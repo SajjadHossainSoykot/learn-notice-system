@@ -4,195 +4,204 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type Notice = {
-  _id: string;
-  title: string;
-  description: string;
-  category: string;
-  createdAt: string;
-  updatedAt: string;
+    _id: string;
+    title: string;
+    description: string;
+    category: string;
+    createdAt: string;
+    updatedAt: string;
 };
 
 type NoticeApiResponse = {
-  success: boolean;
-  message?: string;
-  data: Notice[];
+    success: boolean;
+    message?: string;
+    data: Notice[];
 };
 
 export default function NoticesPage() {
-  const [notices, setNotices] = useState<Notice[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [deletingId, setDeletingId] = useState("");
+    const [notices, setNotices] = useState<Notice[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [deletingId, setDeletingId] = useState("");
 
-  async function fetchNotices() {
-    try {
-      setLoading(true);
-      setError("");
+    async function fetchNotices() {
+        try {
+            setLoading(true);
+            setError("");
 
-      const res = await fetch("/api/notices", {
-        method: "GET",
-        cache: "no-store",
-      });
+            const res = await fetch("/api/notices", {
+                method: "GET",
+                cache: "no-store",
+            });
 
-      const contentType = res.headers.get("content-type");
+            const contentType = res.headers.get("content-type");
 
-      if (!contentType?.includes("application/json")) {
-        setError("Server returned a non-JSON response. Check the API route.");
-        return;
-      }
+            if (!contentType?.includes("application/json")) {
+                setError("Server returned a non-JSON response. Check the API route.");
+                return;
+            }
 
-      const result: NoticeApiResponse = await res.json();
+            const result: NoticeApiResponse = await res.json();
 
-      if (!res.ok || !result.success) {
-        setError(result.message || "Failed to fetch notices");
-        return;
-      }
+            if (!res.ok || !result.success) {
+                setError(result.message || "Failed to fetch notices");
+                return;
+            }
 
-      setNotices(result.data || []);
-    } catch (error) {
-      console.error("Notice fetch error:", error);
-      setError("Something went wrong while fetching notices");
-    } finally {
-      setLoading(false);
+            setNotices(result.data || []);
+        } catch (error) {
+            console.error("Notice fetch error:", error);
+            setError("Something went wrong while fetching notices");
+        } finally {
+            setLoading(false);
+        }
     }
-  }
 
-  async function handleDelete(id: string) {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this notice?"
+    async function handleDelete(id: string) {
+        const confirmDelete = window.confirm(
+            "Are you sure you want to delete this notice?"
+        );
+
+        if (!confirmDelete) return;
+
+        try {
+            setDeletingId(id);
+
+            const res = await fetch(`/api/notices/${id}`, {
+                method: "DELETE",
+            });
+
+            const contentType = res.headers.get("content-type");
+
+            if (!contentType?.includes("application/json")) {
+                alert("API route not found or server returned a non-JSON response.");
+                return;
+            }
+
+            const result = await res.json();
+
+            if (!res.ok || !result.success) {
+                alert(result.message || "Failed to delete notice");
+                return;
+            }
+
+            setNotices((prevNotices) =>
+                prevNotices.filter((notice) => notice._id !== id)
+            );
+        } catch (error) {
+            console.error("Delete notice error:", error);
+            alert("Something went wrong while deleting the notice.");
+        } finally {
+            setDeletingId("");
+        }
+    }
+
+    useEffect(() => {
+        fetchNotices();
+    }, []);
+
+    return (
+        <main className="min-h-screen bg-gray-50 px-6 py-10 text-gray-900">
+            <div className="mx-auto max-w-5xl">
+                <header className="mb-8 rounded-2xl border bg-white p-6 shadow-sm">
+                    <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <p className="mb-2 text-sm font-medium uppercase tracking-wide text-gray-500">
+                                MongoDB Learning Project
+                            </p>
+
+                            <h1 className="mb-2 text-3xl font-bold">Notice Board</h1>
+
+                            <p className="max-w-2xl text-gray-600">
+                                This page fetches notices from MongoDB Atlas using Next.js API
+                                routes. You can add, view, and delete notices from the browser.
+                            </p>
+                        </div>
+
+                        <div className="flex flex-wrap gap-3">
+                            <button
+                                type="button"
+                                onClick={fetchNotices}
+                                className="rounded-lg border px-5 py-3 font-medium text-gray-700 transition hover:bg-gray-100"
+                            >
+                                Refresh
+                            </button>
+
+                            <Link
+                                href="/notices/add"
+                                className="rounded-lg bg-gray-900 px-5 py-3 font-medium text-white transition hover:bg-gray-700"
+                            >
+                                Add Notice
+                            </Link>
+                        </div>
+                    </div>
+                </header>
+
+                {loading && (
+                    <div className="rounded-xl border bg-white p-6 text-gray-600 shadow-sm">
+                        Loading notices...
+                    </div>
+                )}
+
+                {!loading && error && (
+                    <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-600">
+                        {error}
+                    </div>
+                )}
+
+                {!loading && !error && notices.length === 0 && (
+                    <div className="rounded-xl border bg-white p-6 text-gray-600 shadow-sm">
+                        No notices found.
+                    </div>
+                )}
+
+                {!loading && !error && notices.length > 0 && (
+                    <div className="space-y-4">
+                        {notices.map((notice) => (
+                            <article
+                                key={notice._id}
+                                className="rounded-xl border bg-white p-5 shadow-sm transition hover:shadow-md"
+                            >
+                                <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                    <h2 className="text-xl font-semibold">{notice.title}</h2>
+
+                                    <span className="w-fit rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">
+                                        {notice.category}
+                                    </span>
+                                </div>
+
+                                <p className="mb-4 leading-relaxed text-gray-700">
+                                    {notice.description}
+                                </p>
+
+                                <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                                    <p className="text-sm text-gray-500">
+                                        Created: {new Date(notice.createdAt).toLocaleString()}
+                                    </p>
+
+                                    <div className="flex flex-wrap gap-2">
+                                        <Link
+                                            href={`/notices/edit/${notice._id}`}
+                                            className="w-fit rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+                                        >
+                                            Edit
+                                        </Link>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDelete(notice._id)}
+                                            disabled={deletingId === notice._id}
+                                            className="w-fit rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                        >
+                                            {deletingId === notice._id ? "Deleting..." : "Delete"}
+                                        </button>
+                                    </div>
+                                </div>
+                            </article>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </main>
     );
-
-    if (!confirmDelete) return;
-
-    try {
-      setDeletingId(id);
-
-      const res = await fetch(`/api/notices/${id}`, {
-        method: "DELETE",
-      });
-
-      const contentType = res.headers.get("content-type");
-
-      if (!contentType?.includes("application/json")) {
-        alert("API route not found or server returned a non-JSON response.");
-        return;
-      }
-
-      const result = await res.json();
-
-      if (!res.ok || !result.success) {
-        alert(result.message || "Failed to delete notice");
-        return;
-      }
-
-      setNotices((prevNotices) =>
-        prevNotices.filter((notice) => notice._id !== id)
-      );
-    } catch (error) {
-      console.error("Delete notice error:", error);
-      alert("Something went wrong while deleting the notice.");
-    } finally {
-      setDeletingId("");
-    }
-  }
-
-  useEffect(() => {
-    fetchNotices();
-  }, []);
-
-  return (
-    <main className="min-h-screen bg-gray-50 px-6 py-10 text-gray-900">
-      <div className="mx-auto max-w-5xl">
-        <header className="mb-8 rounded-2xl border bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="mb-2 text-sm font-medium uppercase tracking-wide text-gray-500">
-                MongoDB Learning Project
-              </p>
-
-              <h1 className="mb-2 text-3xl font-bold">Notice Board</h1>
-
-              <p className="max-w-2xl text-gray-600">
-                This page fetches notices from MongoDB Atlas using Next.js API
-                routes. You can add, view, and delete notices from the browser.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={fetchNotices}
-                className="rounded-lg border px-5 py-3 font-medium text-gray-700 transition hover:bg-gray-100"
-              >
-                Refresh
-              </button>
-
-              <Link
-                href="/notices/add"
-                className="rounded-lg bg-gray-900 px-5 py-3 font-medium text-white transition hover:bg-gray-700"
-              >
-                Add Notice
-              </Link>
-            </div>
-          </div>
-        </header>
-
-        {loading && (
-          <div className="rounded-xl border bg-white p-6 text-gray-600 shadow-sm">
-            Loading notices...
-          </div>
-        )}
-
-        {!loading && error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-600">
-            {error}
-          </div>
-        )}
-
-        {!loading && !error && notices.length === 0 && (
-          <div className="rounded-xl border bg-white p-6 text-gray-600 shadow-sm">
-            No notices found.
-          </div>
-        )}
-
-        {!loading && !error && notices.length > 0 && (
-          <div className="space-y-4">
-            {notices.map((notice) => (
-              <article
-                key={notice._id}
-                className="rounded-xl border bg-white p-5 shadow-sm transition hover:shadow-md"
-              >
-                <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <h2 className="text-xl font-semibold">{notice.title}</h2>
-
-                  <span className="w-fit rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">
-                    {notice.category}
-                  </span>
-                </div>
-
-                <p className="mb-4 leading-relaxed text-gray-700">
-                  {notice.description}
-                </p>
-
-                <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-sm text-gray-500">
-                    Created: {new Date(notice.createdAt).toLocaleString()}
-                  </p>
-
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(notice._id)}
-                    disabled={deletingId === notice._id}
-                    className="w-fit rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {deletingId === notice._id ? "Deleting..." : "Delete"}
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </div>
-    </main>
-  );
 }
