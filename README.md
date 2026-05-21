@@ -1,4 +1,4 @@
-# 📢 Learn Notice System
+# 📢 Learn Notice System Using CRUD Method
 
 A simple full-stack **Notice Management System** built with **Next.js**, **React**, **TypeScript**, **Tailwind CSS**, and **MongoDB**.
 
