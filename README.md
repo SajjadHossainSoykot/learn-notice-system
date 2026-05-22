@@ -473,3 +473,19 @@ You may modify and extend this project according to your own requirements.
 Current status: **Learning project / Basic CRUD version completed**
 
 The project currently supports basic notice management with MongoDB and Next.js API routes. Future versions may include authentication, an admin dashboard, notice attachments, and advanced caching.
+
+# TODO
+
+## Completed
+- MongoDB Atlas connection
+- Notice CRUD API
+- Add notice page
+- Edit notice page
+- Delete notice feature
+- Notice listing page
+
+## Next
+- Add admin authentication
+- Move add/edit/delete pages under /admin
+- Keep /notices public read-only
+- Later add PDF/image upload with Cloudinary
