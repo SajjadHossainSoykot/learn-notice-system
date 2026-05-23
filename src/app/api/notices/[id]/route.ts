@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
+import { auth } from "@/auth";
 
 type RouteContext = {
   params: Promise<{
@@ -64,6 +65,18 @@ export async function GET(request: Request, context: RouteContext) {
 
 export async function PUT(request: Request, context: RouteContext) {
   try {
+    const session = await auth();
+
+    if (!session?.user) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized. Please login as admin.",
+        },
+        { status: 401 }
+      );
+    }
+
     const { id } = await context.params;
 
     if (!ObjectId.isValid(id)) {
@@ -95,6 +108,7 @@ export async function PUT(request: Request, context: RouteContext) {
       title,
       description,
       category,
+      updatedBy: session.user.email,
       updatedAt: new Date(),
     };
 
@@ -140,6 +154,18 @@ export async function PUT(request: Request, context: RouteContext) {
 
 export async function DELETE(request: Request, context: RouteContext) {
   try {
+    const session = await auth();
+
+    if (!session?.user) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized. Please login as admin.",
+        },
+        { status: 401 }
+      );
+    }
+
     const { id } = await context.params;
 
     if (!ObjectId.isValid(id)) {
