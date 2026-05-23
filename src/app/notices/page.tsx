@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import NoticeAttachmentCard from "@/components/notices/NoticeAttachmentCard";
 import AttachmentPreviewModal from "@/components/notices/AttachmentPreviewModal";
 
@@ -29,10 +29,34 @@ type PreviewFile = {
   fileName?: string;
 };
 
+const ITEMS_PER_PAGE = 5;
+
+const categoryFilters = [
+  "All",
+  "General",
+  "Academic",
+  "Event",
+  "Exam",
+  "Emergency",
+];
+
+function formatDate(dateValue: string) {
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Invalid date";
+  }
+
+  return date.toLocaleDateString();
+}
+
 export default function PublicNoticesPage() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [currentPage, setCurrentPage] = useState(1);
   const [previewFile, setPreviewFile] = useState<PreviewFile | null>(null);
 
   async function fetchNotices() {
@@ -61,26 +85,85 @@ export default function PublicNoticesPage() {
     }
   }
 
+  const filteredNotices = useMemo(() => {
+    const sorted = [...notices].sort(
+      (a, b) =>
+        new Date(b.noticeDate).getTime() - new Date(a.noticeDate).getTime()
+    );
+
+    if (activeCategory === "All") {
+      return sorted;
+    }
+
+    return sorted.filter((notice) => notice.category === activeCategory);
+  }, [notices, activeCategory]);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredNotices.length / ITEMS_PER_PAGE)
+  );
+
+  const paginatedNotices = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredNotices.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredNotices, currentPage]);
+
+  function handleCategoryChange(category: string) {
+    setActiveCategory(category);
+    setCurrentPage(1);
+  }
+
   useEffect(() => {
     fetchNotices();
   }, []);
 
   return (
     <>
-      <main className="min-h-screen bg-gray-50 px-6 py-10 text-gray-900">
-        <div className="mx-auto max-w-5xl">
-          <header className="mb-8 rounded-2xl border bg-white p-6 shadow-sm">
+      <main className="min-h-screen bg-gray-50 px-4 py-8 text-gray-900 sm:px-6 sm:py-10">
+        <div className="mx-auto max-w-6xl">
+          <header className="mb-6 rounded-2xl border bg-white p-6 shadow-sm">
             <p className="mb-2 text-sm font-medium uppercase tracking-wide text-gray-500">
               Public Notice Board
             </p>
 
-            <h1 className="mb-2 text-3xl font-bold">All Notices</h1>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h1 className="mb-2 text-3xl font-bold">All Notices</h1>
 
-            <p className="max-w-2xl text-gray-600">
-              View latest notices published from the admin notice management
-              system.
-            </p>
+                <p className="max-w-2xl text-gray-600">
+                  View latest notices published from the admin notice management
+                  system.
+                </p>
+              </div>
+
+              <p className="text-sm text-gray-500">
+                Showing{" "}
+                <span className="font-medium text-gray-900">
+                  {filteredNotices.length}
+                </span>{" "}
+                notice(s)
+              </p>
+            </div>
           </header>
+
+          <div className="mb-6 overflow-x-auto">
+            <div className="flex min-w-max gap-2">
+              {categoryFilters.map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => handleCategoryChange(category)}
+                  className={
+                    activeCategory === category
+                      ? "rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white"
+                      : "rounded-full border bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+                  }
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {loading && (
             <div className="rounded-xl border bg-white p-6 text-gray-600 shadow-sm">
@@ -94,53 +177,98 @@ export default function PublicNoticesPage() {
             </div>
           )}
 
-          {!loading && !error && notices.length === 0 && (
+          {!loading && !error && filteredNotices.length === 0 && (
             <div className="rounded-xl border bg-white p-6 text-gray-600 shadow-sm">
-              No notices found.
+              No notices found for this category.
             </div>
           )}
 
-          {!loading && !error && notices.length > 0 && (
-            <div className="space-y-4">
-              {notices.map((notice) => (
-                <article
-                  key={notice._id}
-                  className="rounded-xl border bg-white p-5 shadow-sm"
-                >
-                  <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <h2 className="text-xl font-semibold">{notice.title}</h2>
+          {!loading && !error && paginatedNotices.length > 0 && (
+            <>
+              <div className="grid gap-4 md:grid-cols-2">
+                {paginatedNotices.map((notice) => (
+                  <article
+                    key={notice._id}
+                    className="rounded-xl border bg-white p-5 shadow-sm transition hover:shadow-md"
+                  >
+                    <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <h2 className="line-clamp-2 text-lg font-semibold">
+                        {notice.title}
+                      </h2>
 
-                    <span className="w-fit rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">
-                      {notice.category}
-                    </span>
-                  </div>
+                      <span className="w-fit rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                        {notice.category}
+                      </span>
+                    </div>
 
-                  <p className="mb-4 leading-relaxed text-gray-700">
-                    {notice.description}
-                  </p>
+                    <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-gray-700">
+                      {notice.description}
+                    </p>
 
-                  <NoticeAttachmentCard
-                    fileUrl={notice.fileUrl}
-                    fileType={notice.fileType}
-                    fileName={notice.fileName}
-                    onPreview={() =>
-                      setPreviewFile({
-                        fileUrl: notice.fileUrl || "",
-                        fileType: notice.fileType,
-                        fileName: notice.fileName,
-                      })
+                    <NoticeAttachmentCard
+                      fileUrl={notice.fileUrl}
+                      fileType={notice.fileType}
+                      fileName={notice.fileName}
+                      onPreview={() =>
+                        setPreviewFile({
+                          fileUrl: notice.fileUrl || "",
+                          fileType: notice.fileType,
+                          fileName: notice.fileName,
+                        })
+                      }
+                    />
+
+                    <p className="border-t pt-4 text-sm text-gray-500">
+                      Notice Date:{" "}
+                      <span className="font-medium text-gray-900">
+                        {formatDate(notice.noticeDate)}
+                      </span>
+                    </p>
+                  </article>
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(1, prev - 1))
                     }
-                  />
+                    disabled={currentPage === 1}
+                    className="rounded-lg border bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
 
-                  <p className="border-t pt-4 text-sm text-gray-500">
-                    Notice Date:{" "}
-                    <span className="font-medium text-gray-900">
-                      {new Date(notice.noticeDate).toLocaleDateString()}
-                    </span>
-                  </p>
-                </article>
-              ))}
-            </div>
+                  {Array.from({ length: totalPages }, (_, index) => (
+                    <button
+                      key={index + 1}
+                      type="button"
+                      onClick={() => setCurrentPage(index + 1)}
+                      className={
+                        currentPage === index + 1
+                          ? "rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white"
+                          : "rounded-lg border bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+                      }
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                    }
+                    disabled={currentPage === totalPages}
+                    className="rounded-lg border bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>

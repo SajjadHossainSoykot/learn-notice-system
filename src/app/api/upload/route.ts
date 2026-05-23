@@ -13,7 +13,7 @@ type CloudinaryUploadResult = {
   bytes?: number;
 };
 
-function cleanFileName(fileName: string) {
+function getBaseFileName(fileName: string) {
   return fileName
     .replace(/\.[^/.]+$/, "")
     .replace(/[^a-zA-Z0-9-_]/g, "-")
@@ -28,6 +28,17 @@ function getCloudinaryFolder(fileType: string) {
   return "LearningProjects/LearnNotices/Images";
 }
 
+function getPublicId(fileName: string, fileType: string) {
+  const baseName = getBaseFileName(fileName);
+  const timestamp = Date.now();
+
+  if (fileType === "application/pdf") {
+    return `${timestamp}-${baseName}.pdf`;
+  }
+
+  return `${timestamp}-${baseName}`;
+}
+
 function uploadBufferToCloudinary(
   buffer: Buffer,
   fileName: string,
@@ -40,7 +51,7 @@ function uploadBufferToCloudinary(
       {
         folder: getCloudinaryFolder(fileType),
         resource_type: isPdf ? "raw" : "image",
-        public_id: `${Date.now()}-${cleanFileName(fileName)}`,
+        public_id: getPublicId(fileName, fileType),
       },
       (error, result) => {
         if (error || !result) {
