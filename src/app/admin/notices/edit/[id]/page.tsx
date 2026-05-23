@@ -22,6 +22,8 @@ type UploadedFileData = {
   fileName: string;
 };
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
 function formatDateForInput(dateValue: string) {
   if (!dateValue) return "";
 
@@ -98,6 +100,39 @@ export default function AdminEditNoticePage() {
       fetchNotice();
     }
   }, [id]);
+
+  function handleNewFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const selectedFile = e.target.files?.[0] || null;
+
+    if (!selectedFile) {
+      setNewFile(null);
+      return;
+    }
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "application/pdf",
+    ];
+
+    if (!allowedTypes.includes(selectedFile.type)) {
+      setMessage("Only JPG, PNG, WEBP, and PDF files are allowed.");
+      e.target.value = "";
+      setNewFile(null);
+      return;
+    }
+
+    if (selectedFile.size > MAX_FILE_SIZE) {
+      setMessage("File size must be less than 10MB.");
+      e.target.value = "";
+      setNewFile(null);
+      return;
+    }
+
+    setMessage("");
+    setNewFile(selectedFile);
+  }
 
   async function uploadNewFileIfSelected(): Promise<UploadedFileData> {
     if (!newFile) {
@@ -185,6 +220,7 @@ export default function AdminEditNoticePage() {
     setFileType("");
     setFileName("");
     setNewFile(null);
+    setMessage("");
   }
 
   if (loading) {
@@ -316,7 +352,7 @@ export default function AdminEditNoticePage() {
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp,application/pdf"
-              onChange={(e) => setNewFile(e.target.files?.[0] || null)}
+              onChange={handleNewFileChange}
               className="w-full rounded-lg border bg-white px-4 py-3 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
             />
 

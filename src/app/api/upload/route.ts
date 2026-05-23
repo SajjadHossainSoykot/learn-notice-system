@@ -106,7 +106,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          message: "File size must be less than 5MB.",
+          message: "File size must be less than 10MB.",
         },
         { status: 400 }
       );
