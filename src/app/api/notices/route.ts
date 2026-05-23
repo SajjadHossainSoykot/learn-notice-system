@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
+import { auth } from "@/auth";
 
 export async function GET() {
   try {
@@ -11,9 +12,18 @@ export async function GET() {
       .sort({ createdAt: -1 })
       .toArray();
 
+    const formattedNotices = notices.map((notice) => ({
+      _id: notice._id.toString(),
+      title: notice.title,
+      description: notice.description,
+      category: notice.category,
+      createdAt: notice.createdAt,
+      updatedAt: notice.updatedAt,
+    }));
+
     return NextResponse.json({
       success: true,
-      data: notices,
+      data: formattedNotices,
     });
   } catch (error) {
     console.error("GET /api/notices error:", error);
@@ -30,6 +40,18 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const session = await auth();
+
+    if (!session?.user) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized. Please login as admin.",
+        },
+        { status: 401 }
+      );
+    }
+
     const { db } = await connectToDatabase();
     const body = await request.json();
 
@@ -49,6 +71,7 @@ export async function POST(request: Request) {
       title,
       description,
       category,
+      createdBy: session.user.email,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -60,7 +83,7 @@ export async function POST(request: Request) {
         success: true,
         message: "Notice created successfully",
         data: {
-          _id: result.insertedId,
+          _id: result.insertedId.toString(),
           ...newNotice,
         },
       },
