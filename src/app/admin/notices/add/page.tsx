@@ -185,7 +185,7 @@ export default function AdminAddNoticePage() {
             />
 
             <p className="mt-2 text-sm text-gray-500">
-              Allowed: JPG, PNG, WEBP, PDF. Max file size: 5MB.
+              Allowed: JPG, PNG, WEBP, PDF. Max file size: 10MB.
             </p>
 
             {file && (

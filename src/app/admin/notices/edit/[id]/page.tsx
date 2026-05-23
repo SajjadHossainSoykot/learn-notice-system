@@ -322,7 +322,7 @@ export default function AdminEditNoticePage() {
 
             <p className="mt-2 text-sm text-gray-500">
               Select a new file only if you want to replace the current
-              attachment. Allowed: JPG, PNG, WEBP, PDF. Max size: 5MB.
+              attachment. Allowed: JPG, PNG, WEBP, PDF. Max size: 10MB.
             </p>
 
             {newFile && (
