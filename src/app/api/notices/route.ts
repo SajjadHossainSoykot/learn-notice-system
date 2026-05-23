@@ -74,7 +74,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          message: "Title, description, and category are required",
+          message: "Title, description, and category are required.",
         },
         { status: 400 }
       );
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         success: true,
-        message: "Notice created successfully",
+        message: "Notice created successfully.",
         data: {
           _id: result.insertedId.toString(),
           ...newNotice,
@@ -114,7 +114,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         success: false,
-        message: "Failed to create notice",
+        message: "Failed to create notice.",
       },
       { status: 500 }
     );

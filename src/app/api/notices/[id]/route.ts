@@ -17,7 +17,7 @@ export async function GET(request: Request, context: RouteContext) {
       return NextResponse.json(
         {
           success: false,
-          message: "Invalid notice ID",
+          message: "Invalid notice ID.",
         },
         { status: 400 }
       );
@@ -33,7 +33,7 @@ export async function GET(request: Request, context: RouteContext) {
       return NextResponse.json(
         {
           success: false,
-          message: "Notice not found",
+          message: "Notice not found.",
         },
         { status: 404 }
       );
@@ -62,7 +62,7 @@ export async function GET(request: Request, context: RouteContext) {
     return NextResponse.json(
       {
         success: false,
-        message: "Failed to fetch notice",
+        message: "Failed to fetch notice.",
       },
       { status: 500 }
     );
@@ -89,7 +89,7 @@ export async function PUT(request: Request, context: RouteContext) {
       return NextResponse.json(
         {
           success: false,
-          message: "Invalid notice ID",
+          message: "Invalid notice ID.",
         },
         { status: 400 }
       );
@@ -111,7 +111,7 @@ export async function PUT(request: Request, context: RouteContext) {
       return NextResponse.json(
         {
           success: false,
-          message: "Title, description, and category are required",
+          message: "Title, description, and category are required.",
         },
         { status: 400 }
       );
@@ -146,7 +146,7 @@ export async function PUT(request: Request, context: RouteContext) {
       return NextResponse.json(
         {
           success: false,
-          message: "Notice not found",
+          message: "Notice not found.",
         },
         { status: 404 }
       );
@@ -154,7 +154,7 @@ export async function PUT(request: Request, context: RouteContext) {
 
     return NextResponse.json({
       success: true,
-      message: "Notice updated successfully",
+      message: "Notice updated successfully.",
       data: {
         _id: id,
         ...updatedNotice,
@@ -166,7 +166,7 @@ export async function PUT(request: Request, context: RouteContext) {
     return NextResponse.json(
       {
         success: false,
-        message: "Failed to update notice",
+        message: "Failed to update notice.",
       },
       { status: 500 }
     );
@@ -193,7 +193,7 @@ export async function DELETE(request: Request, context: RouteContext) {
       return NextResponse.json(
         {
           success: false,
-          message: "Invalid notice ID",
+          message: "Invalid notice ID.",
         },
         { status: 400 }
       );
@@ -209,7 +209,7 @@ export async function DELETE(request: Request, context: RouteContext) {
       return NextResponse.json(
         {
           success: false,
-          message: "Notice not found",
+          message: "Notice not found.",
         },
         { status: 404 }
       );
@@ -217,7 +217,7 @@ export async function DELETE(request: Request, context: RouteContext) {
 
     return NextResponse.json({
       success: true,
-      message: "Notice deleted successfully",
+      message: "Notice deleted successfully.",
     });
   } catch (error) {
     console.error("DELETE /api/notices/[id] error:", error);
@@ -225,7 +225,7 @@ export async function DELETE(request: Request, context: RouteContext) {
     return NextResponse.json(
       {
         success: false,
-        message: "Failed to delete notice",
+        message: "Failed to delete notice.",
       },
       { status: 500 }
     );
