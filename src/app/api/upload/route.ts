@@ -50,7 +50,15 @@ function uploadBufferToCloudinary(
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: getCloudinaryFolder(fileType),
+
+        /*
+          For PDF:
+          - raw preserves the original file
+          - public_id must include .pdf
+          - delivery may still be blocked by Cloudinary security settings
+        */
         resource_type: isPdf ? "raw" : "image",
+
         public_id: getPublicId(fileName, fileType),
       },
       (error, result) => {
