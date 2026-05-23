@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import NoticeAttachmentCard from "@/components/notices/NoticeAttachmentCard";
 import AttachmentPreviewModal from "@/components/notices/AttachmentPreviewModal";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import { formatDateTime, formatNoticeDate } from "@/lib/formatDate";
 
 type Notice = {
   _id: string;
@@ -31,7 +32,7 @@ type PreviewFile = {
   fileName?: string;
 };
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 6;
 
 const categoryFilters = [
   "All",
@@ -41,16 +42,6 @@ const categoryFilters = [
   "Exam",
   "Emergency",
 ];
-
-function formatDate(dateValue: string) {
-  const date = new Date(dateValue);
-
-  if (Number.isNaN(date.getTime())) {
-    return "Invalid date";
-  }
-
-  return date.toLocaleDateString();
-}
 
 export default function AdminNoticesPage() {
   const [notices, setNotices] = useState<Notice[]>([]);
@@ -156,7 +147,7 @@ export default function AdminNoticesPage() {
   return (
     <>
       <main className="min-h-screen bg-gray-50 px-4 py-8 text-gray-900 sm:px-6 sm:py-10">
-        <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-7xl">
           <header className="mb-6 rounded-2xl border bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -232,23 +223,23 @@ export default function AdminNoticesPage() {
 
           {!loading && paginatedNotices.length > 0 && (
             <>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {paginatedNotices.map((notice) => (
                   <article
                     key={notice._id}
-                    className="rounded-xl border bg-white p-5 shadow-sm transition hover:shadow-md"
+                    className="flex min-h-[310px] flex-col rounded-xl border bg-white p-5 shadow-sm transition hover:shadow-md"
                   >
                     <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                      <h2 className="line-clamp-2 text-lg font-semibold">
+                      <h2 className="line-clamp-2 text-base font-semibold sm:text-lg">
                         {notice.title}
                       </h2>
 
-                      <span className="w-fit rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                      <span className="w-fit shrink-0 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
                         {notice.category}
                       </span>
                     </div>
 
-                    <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-gray-700">
+                    <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-gray-700">
                       {notice.description}
                     </p>
 
@@ -268,13 +259,13 @@ export default function AdminNoticesPage() {
                     <div className="mb-4 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-600">
                       Notice Date:{" "}
                       <span className="font-medium text-gray-900">
-                        {formatDate(notice.noticeDate)}
+                        {formatNoticeDate(notice.noticeDate)}
                       </span>
                     </div>
 
-                    <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="mt-auto flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
                       <p className="text-sm text-gray-500">
-                        Created: {new Date(notice.createdAt).toLocaleString()}
+                        Created: {formatDateTime(notice.createdAt)}
                       </p>
 
                       <div className="flex flex-wrap gap-2">
