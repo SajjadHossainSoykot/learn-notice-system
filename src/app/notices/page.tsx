@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 type Notice = {
@@ -115,13 +116,27 @@ export default function PublicNoticesPage() {
                       Attachment: {notice.fileName || "Notice attachment"}
                     </p>
 
+                    {notice.fileType?.startsWith("image/") && (
+                      <div className="relative mb-3 h-72 w-full overflow-hidden rounded-lg border bg-white">
+                        <Image
+                          src={notice.fileUrl}
+                          alt={notice.fileName || notice.title}
+                          fill
+                          className="object-contain"
+                          sizes="(max-width: 768px) 100vw, 900px"
+                        />
+                      </div>
+                    )}
+
                     <a
                       href={notice.fileUrl}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-flex rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
                     >
-                      View Attachment
+                      {notice.fileType === "application/pdf"
+                        ? "View PDF"
+                        : "View Attachment"}
                     </a>
                   </div>
                 )}
