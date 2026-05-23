@@ -16,6 +16,12 @@ type Notice = {
   updatedAt: string;
 };
 
+type UploadedFileData = {
+  fileUrl: string;
+  fileType: string;
+  fileName: string;
+};
+
 function formatDateForInput(dateValue: string) {
   if (!dateValue) return "";
 
@@ -40,6 +46,7 @@ export default function AdminEditNoticePage() {
   const [fileUrl, setFileUrl] = useState("");
   const [fileType, setFileType] = useState("");
   const [fileName, setFileName] = useState("");
+  const [newFile, setNewFile] = useState<File | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -66,7 +73,7 @@ export default function AdminEditNoticePage() {
         const result = await res.json();
 
         if (!res.ok || !result.success) {
-          setMessage(result.message || "Failed to fetch notice");
+          setMessage(result.message || "Failed to fetch notice.");
           return;
         }
 
@@ -92,12 +99,44 @@ export default function AdminEditNoticePage() {
     }
   }, [id]);
 
+  async function uploadNewFileIfSelected(): Promise<UploadedFileData> {
+    if (!newFile) {
+      return {
+        fileUrl,
+        fileType,
+        fileName,
+      };
+    }
+
+    const formData = new FormData();
+    formData.append("file", newFile);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const result = await res.json();
+
+    if (!res.ok || !result.success) {
+      throw new Error(result.message || "File upload failed.");
+    }
+
+    return {
+      fileUrl: result.data.fileUrl,
+      fileType: result.data.fileType,
+      fileName: result.data.fileName,
+    };
+  }
+
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     try {
       setSaving(true);
       setMessage("");
+
+      const uploadedFile = await uploadNewFileIfSelected();
 
       const res = await fetch(`/api/notices/${id}`, {
         method: "PUT",
@@ -109,9 +148,7 @@ export default function AdminEditNoticePage() {
           description,
           category,
           noticeDate,
-          fileUrl,
-          fileType,
-          fileName,
+          ...uploadedFile,
         }),
       });
 
@@ -125,7 +162,7 @@ export default function AdminEditNoticePage() {
       const result = await res.json();
 
       if (!res.ok || !result.success) {
-        setMessage(result.message || "Failed to update notice");
+        setMessage(result.message || "Failed to update notice.");
         return;
       }
 
@@ -133,10 +170,21 @@ export default function AdminEditNoticePage() {
       router.refresh();
     } catch (error) {
       console.error("Update notice error:", error);
-      setMessage("Something went wrong while updating notice.");
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong while updating notice."
+      );
     } finally {
       setSaving(false);
     }
+  }
+
+  function removeCurrentAttachment() {
+    setFileUrl("");
+    setFileType("");
+    setFileName("");
+    setNewFile(null);
   }
 
   if (loading) {
@@ -160,8 +208,7 @@ export default function AdminEditNoticePage() {
           <h1 className="mb-2 text-3xl font-bold">Edit Notice</h1>
 
           <p className="text-gray-600">
-            Update notice title, category, description, and official notice
-            date.
+            Update notice information, date, and optional attachment.
           </p>
         </header>
 
@@ -233,12 +280,57 @@ export default function AdminEditNoticePage() {
 
           <div>
             <label className="mb-2 block font-medium">
-              Attachment <span className="text-gray-400">(coming next)</span>
+              Attachment <span className="text-gray-400">(optional)</span>
             </label>
 
-            <div className="rounded-lg border border-dashed bg-gray-50 px-4 py-6 text-sm text-gray-500">
-              PDF/image attachment update will be added in the Cloudinary step.
-            </div>
+            {fileUrl && (
+              <div className="mb-3 rounded-lg border bg-gray-50 p-4 text-sm text-gray-700">
+                <p className="mb-2">
+                  Current file:{" "}
+                  <span className="font-medium">
+                    {fileName || "Notice attachment"}
+                  </span>
+                </p>
+
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    href={fileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
+                  >
+                    View Current File
+                  </a>
+
+                  <button
+                    type="button"
+                    onClick={removeCurrentAttachment}
+                    className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                  >
+                    Remove Attachment
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,application/pdf"
+              onChange={(e) => setNewFile(e.target.files?.[0] || null)}
+              className="w-full rounded-lg border bg-white px-4 py-3 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
+            />
+
+            <p className="mt-2 text-sm text-gray-500">
+              Select a new file only if you want to replace the current
+              attachment. Allowed: JPG, PNG, WEBP, PDF. Max size: 5MB.
+            </p>
+
+            {newFile && (
+              <div className="mt-3 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-700">
+                New selected file:{" "}
+                <span className="font-medium">{newFile.name}</span>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
