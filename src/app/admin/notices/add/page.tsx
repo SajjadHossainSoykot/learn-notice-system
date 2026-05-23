@@ -1,8 +1,9 @@
 "use client";
+
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
-export default function AddNoticePage() {
+export default function AdminAddNoticePage() {
   const router = useRouter();
 
   const [title, setTitle] = useState("");
@@ -11,7 +12,7 @@ export default function AddNoticePage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     setLoading(true);
@@ -37,14 +38,10 @@ export default function AddNoticePage() {
         return;
       }
 
-      setTitle("");
-      setDescription("");
-      setCategory("General");
-
-      router.push("/notices");
+      router.push("/admin/notices");
       router.refresh();
     } catch (error) {
-      console.error(error);
+      console.error("Add notice error:", error);
       setMessage("Something went wrong");
     } finally {
       setLoading(false);
@@ -56,7 +53,7 @@ export default function AddNoticePage() {
       <div className="mx-auto max-w-2xl">
         <h1 className="mb-2 text-3xl font-bold">Add Notice</h1>
         <p className="mb-8 text-gray-600">
-          Create a new notice and save it into MongoDB.
+          Create a new notice from the protected admin area.
         </p>
 
         <form
@@ -119,7 +116,7 @@ export default function AddNoticePage() {
 
             <button
               type="button"
-              onClick={() => router.push("/notices")}
+              onClick={() => router.push("/admin/notices")}
               className="rounded-lg border px-5 py-3 font-medium"
             >
               Back
