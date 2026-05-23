@@ -8,6 +8,10 @@ type Notice = {
   title: string;
   description: string;
   category: string;
+  noticeDate: string;
+  fileUrl?: string;
+  fileType?: string;
+  fileName?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -99,7 +103,8 @@ export default function AdminNoticesPage() {
               </h1>
 
               <p className="max-w-2xl text-gray-600">
-                Manage notices from here. Public users can only view notices.
+                Manage public notices. You can add backdated notices using the
+                notice date field.
               </p>
             </div>
 
@@ -158,6 +163,13 @@ export default function AdminNoticesPage() {
                 <p className="mb-4 leading-relaxed text-gray-700">
                   {notice.description}
                 </p>
+
+                <div className="mb-4 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                  Notice Date:{" "}
+                  <span className="font-medium text-gray-900">
+                    {new Date(notice.noticeDate).toLocaleDateString()}
+                  </span>
+                </div>
 
                 <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-sm text-gray-500">

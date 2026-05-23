@@ -8,11 +8,25 @@ type Notice = {
   title: string;
   description: string;
   category: string;
+  noticeDate: string;
+  fileUrl?: string;
+  fileType?: string;
+  fileName?: string;
   createdAt: string;
   updatedAt: string;
 };
 
-export default function EditNoticePage() {
+function formatDateForInput(dateValue: string) {
+  if (!dateValue) return "";
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) return "";
+
+  return date.toISOString().split("T")[0];
+}
+
+export default function AdminEditNoticePage() {
   const router = useRouter();
   const params = useParams();
 
@@ -21,6 +35,12 @@ export default function EditNoticePage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("General");
+  const [noticeDate, setNoticeDate] = useState("");
+
+  const [fileUrl, setFileUrl] = useState("");
+  const [fileType, setFileType] = useState("");
+  const [fileName, setFileName] = useState("");
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -55,6 +75,10 @@ export default function EditNoticePage() {
         setTitle(notice.title);
         setDescription(notice.description);
         setCategory(notice.category);
+        setNoticeDate(formatDateForInput(notice.noticeDate));
+        setFileUrl(notice.fileUrl || "");
+        setFileType(notice.fileType || "");
+        setFileName(notice.fileName || "");
       } catch (error) {
         console.error("Fetch single notice error:", error);
         setMessage("Something went wrong while fetching notice.");
@@ -84,6 +108,10 @@ export default function EditNoticePage() {
           title,
           description,
           category,
+          noticeDate,
+          fileUrl,
+          fileType,
+          fileName,
         }),
       });
 
@@ -101,7 +129,7 @@ export default function EditNoticePage() {
         return;
       }
 
-      router.push("/notices");
+      router.push("/admin/notices");
       router.refresh();
     } catch (error) {
       console.error("Update notice error:", error);
@@ -126,11 +154,14 @@ export default function EditNoticePage() {
       <div className="mx-auto max-w-2xl">
         <header className="mb-8">
           <p className="mb-2 text-sm font-medium uppercase tracking-wide text-gray-500">
-            MongoDB CRUD
+            Protected Admin Area
           </p>
+
           <h1 className="mb-2 text-3xl font-bold">Edit Notice</h1>
+
           <p className="text-gray-600">
-            Update this notice using a PUT request and MongoDB updateOne().
+            Update notice title, category, description, and official notice
+            date.
           </p>
         </header>
 
@@ -183,6 +214,33 @@ export default function EditNoticePage() {
             </select>
           </div>
 
+          <div>
+            <label className="mb-2 block font-medium">
+              Notice Date <span className="text-gray-400">(optional)</span>
+            </label>
+
+            <input
+              type="date"
+              value={noticeDate}
+              onChange={(e) => setNoticeDate(e.target.value)}
+              className="w-full rounded-lg border px-4 py-3 outline-none focus:border-gray-900"
+            />
+
+            <p className="mt-2 text-sm text-gray-500">
+              Change this if the notice should show an older or different date.
+            </p>
+          </div>
+
+          <div>
+            <label className="mb-2 block font-medium">
+              Attachment <span className="text-gray-400">(coming next)</span>
+            </label>
+
+            <div className="rounded-lg border border-dashed bg-gray-50 px-4 py-6 text-sm text-gray-500">
+              PDF/image attachment update will be added in the Cloudinary step.
+            </div>
+          </div>
+
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="submit"
@@ -194,7 +252,7 @@ export default function EditNoticePage() {
 
             <button
               type="button"
-              onClick={() => router.push("/notices")}
+              onClick={() => router.push("/admin/notices")}
               className="rounded-lg border px-5 py-3 font-medium text-gray-700 transition hover:bg-gray-100"
             >
               Back

@@ -7,6 +7,10 @@ type Notice = {
   title: string;
   description: string;
   category: string;
+  noticeDate: string;
+  fileUrl?: string;
+  fileType?: string;
+  fileName?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -105,8 +109,28 @@ export default function PublicNoticesPage() {
                   {notice.description}
                 </p>
 
+                {notice.fileUrl && (
+                  <div className="mb-4 rounded-lg border bg-gray-50 p-4">
+                    <p className="mb-2 text-sm font-medium text-gray-700">
+                      Attachment: {notice.fileName || "Notice attachment"}
+                    </p>
+
+                    <a
+                      href={notice.fileUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
+                    >
+                      View Attachment
+                    </a>
+                  </div>
+                )}
+
                 <p className="border-t pt-4 text-sm text-gray-500">
-                  Published: {new Date(notice.createdAt).toLocaleString()}
+                  Notice Date:{" "}
+                  <span className="font-medium text-gray-900">
+                    {new Date(notice.noticeDate).toLocaleDateString()}
+                  </span>
                 </p>
               </article>
             ))}

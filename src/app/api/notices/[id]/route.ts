@@ -46,6 +46,12 @@ export async function GET(request: Request, context: RouteContext) {
         title: notice.title,
         description: notice.description,
         category: notice.category,
+        noticeDate: notice.noticeDate || notice.createdAt,
+        fileUrl: notice.fileUrl || "",
+        fileType: notice.fileType || "",
+        fileName: notice.fileName || "",
+        createdBy: notice.createdBy || "",
+        updatedBy: notice.updatedBy || "",
         createdAt: notice.createdAt,
         updatedAt: notice.updatedAt,
       },
@@ -90,7 +96,16 @@ export async function PUT(request: Request, context: RouteContext) {
     }
 
     const body = await request.json();
-    const { title, description, category } = body;
+
+    const {
+      title,
+      description,
+      category,
+      noticeDate,
+      fileUrl,
+      fileType,
+      fileName,
+    } = body;
 
     if (!title || !description || !category) {
       return NextResponse.json(
@@ -102,12 +117,18 @@ export async function PUT(request: Request, context: RouteContext) {
       );
     }
 
+    const finalNoticeDate = noticeDate ? new Date(noticeDate) : new Date();
+
     const { db } = await connectToDatabase();
 
     const updatedNotice = {
       title,
       description,
       category,
+      noticeDate: finalNoticeDate,
+      fileUrl: fileUrl || "",
+      fileType: fileType || "",
+      fileName: fileName || "",
       updatedBy: session.user.email,
       updatedAt: new Date(),
     };
