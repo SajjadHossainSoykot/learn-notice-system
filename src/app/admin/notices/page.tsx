@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -103,8 +104,8 @@ export default function AdminNoticesPage() {
               </h1>
 
               <p className="max-w-2xl text-gray-600">
-                Manage public notices. You can add backdated notices using the
-                notice date field.
+                Manage public notices with date and optional PDF/image
+                attachments.
               </p>
             </div>
 
@@ -163,6 +164,37 @@ export default function AdminNoticesPage() {
                 <p className="mb-4 leading-relaxed text-gray-700">
                   {notice.description}
                 </p>
+
+                {notice.fileUrl && (
+                  <div className="mb-4 rounded-lg border bg-gray-50 p-4">
+                    <p className="mb-2 text-sm font-medium text-gray-700">
+                      Attachment: {notice.fileName || "Notice attachment"}
+                    </p>
+
+                    {notice.fileType?.startsWith("image/") && (
+                      <div className="relative mb-3 h-72 w-full overflow-hidden rounded-lg border bg-white">
+                        <Image
+                          src={notice.fileUrl}
+                          alt={notice.fileName || notice.title}
+                          fill
+                          className="object-contain"
+                          sizes="(max-width: 768px) 100vw, 900px"
+                        />
+                      </div>
+                    )}
+
+                    <a
+                      href={notice.fileUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
+                    >
+                      {notice.fileType === "application/pdf"
+                        ? "View PDF"
+                        : "View Attachment"}
+                    </a>
+                  </div>
+                )}
 
                 <div className="mb-4 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-600">
                   Notice Date:{" "}
