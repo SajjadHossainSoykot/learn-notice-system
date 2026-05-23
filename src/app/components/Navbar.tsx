@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Menu, X, BellRing } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
+import { signOut, useSession } from "next-auth/react";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -12,10 +13,21 @@ const navLinks = [
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const { data: session, status } = useSession();
+
+  const isLoggedIn = status === "authenticated";
 
   const closeMenu = () => {
     setIsOpen(false);
   };
+
+  async function handleLogout() {
+    closeMenu();
+
+    await signOut({
+      callbackUrl: "/",
+    });
+  }
 
   return (
     <nav className="sticky top-0 z-50 border-b border-(--border) bg-(--background) px-4 py-3 shadow-sm transition-colors sm:px-5 sm:py-4">
@@ -50,6 +62,15 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+
+          {isLoggedIn && (
+            <Link
+              href="/admin/notices"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-(--muted-foreground) transition hover:bg-(--muted) hover:text-(--foreground)"
+            >
+              Admin
+            </Link>
+          )}
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
@@ -62,6 +83,25 @@ export default function Navbar() {
           >
             <FaGithub size={18} />
           </a>
+
+          {status === "loading" ? (
+            <div className="h-10 w-24 rounded-xl border border-(--border) bg-(--muted)" />
+          ) : isLoggedIn ? (
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+            >
+              Logout
+            </button>
+          ) : (
+            <Link
+              href="/admin/login"
+              className="rounded-xl bg-(--primary) px-4 py-2 text-sm font-medium text-(--primary-foreground) transition hover:opacity-85"
+            >
+              Admin Login
+            </Link>
+          )}
         </div>
 
         <div className="flex shrink-0 items-center gap-2 lg:hidden">
@@ -91,16 +131,48 @@ export default function Navbar() {
               </Link>
             ))}
 
+            {isLoggedIn && (
+              <Link
+                href="/admin/notices"
+                onClick={closeMenu}
+                className="rounded-xl px-4 py-3 text-base font-bold text-(--card-foreground) transition hover:bg-(--muted) sm:text-sm"
+              >
+                Admin Dashboard
+              </Link>
+            )}
+
             <a
               href="https://github.com/SajjadHossainSoykot/learn-notice-system"
               target="_blank"
               rel="noreferrer"
               onClick={closeMenu}
-              className="mt-2 inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-(--primary) px-4 py-3 text-base font-bold text-(--primary-foreground) transition hover:opacity-85 sm:text-sm"
+              className="mt-2 inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-(--border) px-4 py-3 text-base font-bold text-(--card-foreground) transition hover:bg-(--muted) sm:text-sm"
             >
               <FaGithub size={17} />
               GitHub Repository
             </a>
+
+            {status === "loading" ? (
+              <div className="mt-2 rounded-xl bg-(--muted) px-4 py-3 text-center text-base font-bold text-(--muted-foreground) sm:text-sm">
+                Checking session...
+              </div>
+            ) : isLoggedIn ? (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="mt-2 inline-flex cursor-pointer items-center justify-center rounded-xl border border-red-200 px-4 py-3 text-base font-bold text-red-600 transition hover:bg-red-50 sm:text-sm"
+              >
+                Logout
+              </button>
+            ) : (
+              <Link
+                href="/admin/login"
+                onClick={closeMenu}
+                className="mt-2 inline-flex cursor-pointer items-center justify-center rounded-xl bg-(--primary) px-4 py-3 text-base font-bold text-(--primary-foreground) transition hover:opacity-85 sm:text-sm"
+              >
+                Admin Login
+              </Link>
+            )}
           </div>
         </div>
       )}
