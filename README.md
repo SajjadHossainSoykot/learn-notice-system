@@ -12,7 +12,7 @@ GitHub Repository:
 https://github.com/SajjadHossainSoykot/learn-notice-system
 
 Live Website:  
-`Add your live Vercel link here after deployment`
+https://learn-notice-system.vercel.app/
 
 ---
 
