@@ -2,12 +2,11 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
+import type { ObjectId } from "mongodb";
 import { connectToDatabase } from "@/lib/mongodb";
 
 type AdminUser = {
-  _id: {
-    toString: () => string;
-  };
+  _id: ObjectId;
   name: string;
   email: string;
   role: string;
@@ -29,7 +28,7 @@ async function findAdminByEmail(email?: string | null) {
 }
 
 function isProviderAllowed(admin: AdminUser, provider: string) {
-  return admin.allowedProviders?.includes(provider);
+  return admin.allowedProviders?.includes(provider) ?? false;
 }
 
 const providers = [
@@ -49,8 +48,8 @@ const providers = [
     },
 
     async authorize(credentials) {
-      const email = credentials?.email as string;
-      const password = credentials?.password as string;
+      const email = credentials?.email as string | undefined;
+      const password = credentials?.password as string | undefined;
 
       if (!email || !password) {
         return null;
