@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
+import FileDropzone from "@/components/notices/FileDropzone";
 
 type Notice = {
   _id: string;
@@ -21,8 +22,6 @@ type UploadedFileData = {
   fileType: string;
   fileName: string;
 };
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 function formatDateForInput(dateValue: string) {
   if (!dateValue) return "";
@@ -100,39 +99,6 @@ export default function AdminEditNoticePage() {
       fetchNotice();
     }
   }, [id]);
-
-  function handleNewFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const selectedFile = e.target.files?.[0] || null;
-
-    if (!selectedFile) {
-      setNewFile(null);
-      return;
-    }
-
-    const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-      "application/pdf",
-    ];
-
-    if (!allowedTypes.includes(selectedFile.type)) {
-      setMessage("Only JPG, PNG, WEBP, and PDF files are allowed.");
-      e.target.value = "";
-      setNewFile(null);
-      return;
-    }
-
-    if (selectedFile.size > MAX_FILE_SIZE) {
-      setMessage("File size must be less than 10MB.");
-      e.target.value = "";
-      setNewFile(null);
-      return;
-    }
-
-    setMessage("");
-    setNewFile(selectedFile);
-  }
 
   async function uploadNewFileIfSelected(): Promise<UploadedFileData> {
     if (!newFile) {
@@ -314,60 +280,47 @@ export default function AdminEditNoticePage() {
             </p>
           </div>
 
-          <div>
-            <label className="mb-2 block font-medium">
-              Attachment <span className="text-gray-400">(optional)</span>
-            </label>
+          {fileUrl && (
+            <div className="rounded-xl border bg-gray-50 p-4 text-sm text-gray-700">
+              <p className="mb-2">
+                Current attachment:{" "}
+                <span className="font-medium">
+                  {fileName || "Notice attachment"}
+                </span>
+              </p>
 
-            {fileUrl && (
-              <div className="mb-3 rounded-lg border bg-gray-50 p-4 text-sm text-gray-700">
-                <p className="mb-2">
-                  Current file:{" "}
-                  <span className="font-medium">
-                    {fileName || "Notice attachment"}
-                  </span>
-                </p>
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href={fileUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
+                >
+                  View Current File
+                </a>
 
-                <div className="flex flex-wrap gap-2">
-                  <a
-                    href={fileUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
-                  >
-                    View Current File
-                  </a>
-
-                  <button
-                    type="button"
-                    onClick={removeCurrentAttachment}
-                    className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
-                  >
-                    Remove Attachment
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={removeCurrentAttachment}
+                  className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                >
+                  Remove Attachment
+                </button>
               </div>
-            )}
+            </div>
+          )}
 
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp,application/pdf"
-              onChange={handleNewFileChange}
-              className="w-full rounded-lg border bg-white px-4 py-3 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
-            />
-
-            <p className="mt-2 text-sm text-gray-500">
-              Select a new file only if you want to replace the current
-              attachment. Allowed: JPG, PNG, WEBP, PDF. Max size: 10MB.
-            </p>
-
-            {newFile && (
-              <div className="mt-3 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-700">
-                New selected file:{" "}
-                <span className="font-medium">{newFile.name}</span>
-              </div>
-            )}
-          </div>
+          <FileDropzone
+            file={newFile}
+            onFileChange={setNewFile}
+            onError={setMessage}
+            label={fileUrl ? "Replace Attachment" : "Attachment"}
+            helperText={
+              fileUrl
+                ? "Drop a new file only if you want to replace the current attachment. Allowed: JPG, PNG, WEBP, PDF. Max 10MB."
+                : "Allowed: JPG, PNG, WEBP, PDF. Max file size: 10MB."
+            }
+          />
 
           <div className="flex flex-wrap items-center gap-3">
             <button
