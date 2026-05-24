@@ -24,6 +24,35 @@ const categoryFilters = [
   "Emergency",
 ];
 
+function getDateSearchText(dateValue: string) {
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const day = date.toLocaleDateString("en-GB", { day: "2-digit" });
+  const monthLong = date.toLocaleDateString("en-GB", { month: "long" });
+  const monthShort = date.toLocaleDateString("en-GB", { month: "short" });
+  const monthNumber = date.toLocaleDateString("en-GB", { month: "2-digit" });
+  const year = date.toLocaleDateString("en-GB", { year: "numeric" });
+
+  return [
+    formatNoticeDate(dateValue),
+    `${day} ${monthLong}`,
+    `${day} ${monthLong} ${year}`,
+    `${day} ${monthShort}`,
+    `${day} ${monthShort} ${year}`,
+    `${day}/${monthNumber}/${year}`,
+    `${day}-${monthNumber}-${year}`,
+    `${monthLong} ${year}`,
+    `${monthShort} ${year}`,
+    year,
+  ]
+    .join(" ")
+    .toLowerCase();
+}
+
 export default function NoticeBoard({ mode }: NoticeBoardProps) {
   const isAdmin = mode === "admin";
 
@@ -90,6 +119,7 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
         notice.category,
         notice.fileName,
         formatNoticeDate(notice.noticeDate),
+        getDateSearchText(notice.noticeDate),
       ]
         .filter(Boolean)
         .join(" ")
@@ -165,7 +195,7 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
     <>
       <main className="min-h-screen bg-gray-50 px-4 py-8 text-gray-900 sm:px-6 sm:py-10">
         <div className="mx-auto max-w-7xl">
-          <header className="mb-6 rounded-2xl border bg-white p-6 shadow-sm">
+          <header className="mb-6 rounded-2xl border bg-white p-5 shadow-sm sm:p-6">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="mb-2 text-sm font-medium uppercase tracking-wide text-gray-500">
@@ -215,8 +245,8 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
           </header>
 
           <section className="mb-6 rounded-2xl border bg-white p-4 shadow-sm">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="relative w-full lg:max-w-md">
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+              <div className="relative w-full xl:max-w-md">
                 <Search
                   size={18}
                   className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
@@ -226,7 +256,7 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
-                  placeholder="Search by title, description, category, file..."
+                  placeholder="Search title, description, date, category, file..."
                   className="w-full rounded-xl border bg-gray-50 py-3 pl-11 pr-11 text-sm outline-none transition focus:border-gray-900 focus:bg-white"
                 />
 
@@ -242,23 +272,21 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
                 )}
               </div>
 
-              <div className="overflow-x-auto">
-                <div className="flex min-w-max gap-2">
-                  {categoryFilters.map((category) => (
-                    <button
-                      key={category}
-                      type="button"
-                      onClick={() => handleCategoryChange(category)}
-                      className={
-                        activeCategory === category
-                          ? "rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white"
-                          : "rounded-full border bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
-                      }
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
+              <div className="flex flex-wrap gap-2">
+                {categoryFilters.map((category) => (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => handleCategoryChange(category)}
+                    className={
+                      activeCategory === category
+                        ? "rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white"
+                        : "rounded-full border bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+                    }
+                  >
+                    {category}
+                  </button>
+                ))}
               </div>
             </div>
           </section>
