@@ -8,6 +8,9 @@ type UploadedFileData = {
   fileUrl: string;
   fileType: string;
   fileName: string;
+  filePublicId: string;
+  fileResourceType: string;
+  filePreviewUrls: string[];
 };
 
 export default function AdminAddNoticePage() {
@@ -28,6 +31,9 @@ export default function AdminAddNoticePage() {
         fileUrl: "",
         fileType: "",
         fileName: "",
+        filePublicId: "",
+        fileResourceType: "",
+        filePreviewUrls: [],
       };
     }
 
@@ -46,9 +52,12 @@ export default function AdminAddNoticePage() {
     }
 
     return {
-      fileUrl: result.data.fileUrl,
-      fileType: result.data.fileType,
-      fileName: result.data.fileName,
+      fileUrl: result.data.fileUrl || "",
+      fileType: result.data.fileType || "",
+      fileName: result.data.fileName || "",
+      filePublicId: result.data.filePublicId || "",
+      fileResourceType: result.data.fileResourceType || "",
+      filePreviewUrls: result.data.filePreviewUrls || [],
     };
   }
 
@@ -86,6 +95,7 @@ export default function AdminAddNoticePage() {
       router.refresh();
     } catch (error) {
       console.error("Add notice error:", error);
+
       setMessage(
         error instanceof Error
           ? error.message
