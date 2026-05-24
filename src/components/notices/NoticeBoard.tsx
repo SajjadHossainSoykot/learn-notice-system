@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Search, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import NoticeAttachmentCard from "@/components/notices/NoticeAttachmentCard";
 import AttachmentPreviewModal from "@/components/notices/AttachmentPreviewModal";
@@ -30,6 +31,7 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -65,17 +67,37 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
   }
 
   const filteredNotices = useMemo(() => {
+    const normalizedSearch = searchQuery.trim().toLowerCase();
+
     const sorted = [...notices].sort(
       (a, b) =>
         new Date(b.noticeDate).getTime() - new Date(a.noticeDate).getTime()
     );
 
-    if (activeCategory === "All") {
-      return sorted;
+    const categoryFiltered =
+      activeCategory === "All"
+        ? sorted
+        : sorted.filter((notice) => notice.category === activeCategory);
+
+    if (!normalizedSearch) {
+      return categoryFiltered;
     }
 
-    return sorted.filter((notice) => notice.category === activeCategory);
-  }, [notices, activeCategory]);
+    return categoryFiltered.filter((notice) => {
+      const searchableText = [
+        notice.title,
+        notice.description,
+        notice.category,
+        notice.fileName,
+        formatNoticeDate(notice.noticeDate),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return searchableText.includes(normalizedSearch);
+    });
+  }, [notices, activeCategory, searchQuery]);
 
   const totalPages = Math.max(
     1,
@@ -83,13 +105,24 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
   );
 
   const paginatedNotices = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const safeCurrentPage = Math.min(currentPage, totalPages);
+    const startIndex = (safeCurrentPage - 1) * ITEMS_PER_PAGE;
 
     return filteredNotices.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredNotices, currentPage]);
+  }, [filteredNotices, currentPage, totalPages]);
 
   function handleCategoryChange(category: string) {
     setActiveCategory(category);
+    setCurrentPage(1);
+  }
+
+  function handleSearchChange(value: string) {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  }
+
+  function clearSearch() {
+    setSearchQuery("");
     setCurrentPage(1);
   }
 
@@ -181,24 +214,54 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
             </div>
           </header>
 
-          <div className="mb-6 overflow-x-auto">
-            <div className="flex min-w-max gap-2">
-              {categoryFilters.map((category) => (
-                <button
-                  key={category}
-                  type="button"
-                  onClick={() => handleCategoryChange(category)}
-                  className={
-                    activeCategory === category
-                      ? "rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white"
-                      : "rounded-full border bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
-                  }
-                >
-                  {category}
-                </button>
-              ))}
+          <section className="mb-6 rounded-2xl border bg-white p-4 shadow-sm">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="relative w-full lg:max-w-md">
+                <Search
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                />
+
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  placeholder="Search by title, description, category, file..."
+                  className="w-full rounded-xl border bg-gray-50 py-3 pl-11 pr-11 text-sm outline-none transition focus:border-gray-900 focus:bg-white"
+                />
+
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={clearSearch}
+                    className="absolute right-3 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-200"
+                    aria-label="Clear search"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+
+              <div className="overflow-x-auto">
+                <div className="flex min-w-max gap-2">
+                  {categoryFilters.map((category) => (
+                    <button
+                      key={category}
+                      type="button"
+                      onClick={() => handleCategoryChange(category)}
+                      className={
+                        activeCategory === category
+                          ? "rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white"
+                          : "rounded-full border bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+                      }
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
+          </section>
 
           {loading && (
             <div className="rounded-xl border bg-white p-6 text-gray-600 shadow-sm">
@@ -214,7 +277,7 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
 
           {!loading && !error && filteredNotices.length === 0 && (
             <div className="rounded-xl border bg-white p-6 text-gray-600 shadow-sm">
-              No notices found for this category.
+              No notices found. Try changing the search text or category.
             </div>
           )}
 
