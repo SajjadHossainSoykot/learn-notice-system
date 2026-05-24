@@ -193,27 +193,27 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
 
   return (
     <>
-      <main className="min-h-screen bg-gray-50 px-4 py-8 text-gray-900 sm:px-6 sm:py-10">
-        <div className="mx-auto max-w-7xl">
+      <main className="min-h-screen overflow-x-hidden bg-gray-50 px-4 py-8 text-gray-900 sm:px-6 sm:py-10">
+        <div className="mx-auto w-full max-w-7xl overflow-x-hidden">
           <header className="mb-6 rounded-2xl border bg-white p-5 shadow-sm sm:p-6">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-              <div>
+            <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
                 <p className="mb-2 text-sm font-medium uppercase tracking-wide text-gray-500">
                   {isAdmin ? "Protected Admin Area" : "Public Notice Board"}
                 </p>
 
-                <h1 className="mb-2 text-3xl font-bold">
+                <h1 className="mb-2 break-words text-3xl font-bold">
                   {isAdmin ? "Admin Notice Dashboard" : "All Notices"}
                 </h1>
 
-                <p className="max-w-2xl text-gray-600">
+                <p className="max-w-2xl break-words text-gray-600">
                   {isAdmin
                     ? "Manage public notices with date and optional PDF/image attachments."
                     : "View latest notices published from the admin notice management system."}
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex min-w-0 flex-wrap items-center gap-3">
                 <p className="text-sm text-gray-500">
                   Showing{" "}
                   <span className="font-medium text-gray-900">
@@ -245,8 +245,8 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
           </header>
 
           <section className="mb-6 rounded-2xl border bg-white p-4 shadow-sm">
-            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-              <div className="relative w-full xl:max-w-md">
+            <div className="flex min-w-0 flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+              <div className="relative w-full min-w-0 xl:max-w-md">
                 <Search
                   size={18}
                   className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
@@ -257,7 +257,7 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
                   placeholder="Search title, description, date, category, file..."
-                  className="w-full rounded-xl border bg-gray-50 py-3 pl-11 pr-11 text-sm outline-none transition focus:border-gray-900 focus:bg-white"
+                  className="w-full min-w-0 rounded-xl border bg-gray-50 py-3 pl-11 pr-11 text-sm outline-none transition focus:border-gray-900 focus:bg-white"
                 />
 
                 {searchQuery && (
@@ -272,7 +272,7 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
                 )}
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex min-w-0 flex-wrap gap-2">
                 {categoryFilters.map((category) => (
                   <button
                     key={category}
@@ -311,18 +311,18 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
 
           {!loading && paginatedNotices.length > 0 && (
             <>
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {paginatedNotices.map((notice) => (
                   <article
                     key={notice._id}
                     className={
                       isAdmin
-                        ? "flex min-h-[310px] flex-col rounded-xl border bg-white p-5 shadow-sm transition hover:shadow-md"
-                        : "flex min-h-[260px] flex-col rounded-xl border bg-white p-5 shadow-sm transition hover:shadow-md"
+                        ? "flex min-w-0 max-w-full flex-col overflow-hidden rounded-xl border bg-white p-4 shadow-sm transition hover:shadow-md sm:min-h-[310px] sm:p-5"
+                        : "flex min-w-0 max-w-full flex-col overflow-hidden rounded-xl border bg-white p-4 shadow-sm transition hover:shadow-md sm:min-h-[260px] sm:p-5"
                     }
                   >
-                    <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                      <h2 className="line-clamp-2 text-base font-semibold sm:text-lg">
+                    <div className="mb-3 flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <h2 className="min-w-0 break-words text-base font-semibold sm:line-clamp-2 sm:text-lg">
                         {notice.title}
                       </h2>
 
@@ -331,7 +331,7 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
                       </span>
                     </div>
 
-                    <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-gray-700">
+                    <p className="mb-4 min-w-0 break-words text-sm leading-relaxed text-gray-700 sm:line-clamp-2">
                       {notice.description}
                     </p>
 
@@ -349,16 +349,16 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
                       }
                     />
 
-                    <div className="mb-4 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                    <div className="mb-4 min-w-0 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-600">
                       Notice Date:{" "}
                       <span className="font-medium text-gray-900">
                         {formatNoticeDate(notice.noticeDate)}
                       </span>
                     </div>
 
-                    <div className="mt-auto flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="mt-auto flex min-w-0 flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
                       {isAdmin ? (
-                        <p className="text-sm text-gray-500">
+                        <p className="break-words text-sm text-gray-500">
                           Created: {formatDateTime(notice.createdAt)}
                         </p>
                       ) : (
