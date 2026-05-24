@@ -4,9 +4,14 @@ export type Notice = {
   description: string;
   category: string;
   noticeDate: string;
+
   fileUrl?: string;
   fileType?: string;
   fileName?: string;
+  filePublicId?: string;
+  fileResourceType?: string;
+  filePreviewUrls?: string[];
+
   createdAt: string;
   updatedAt: string;
 };
@@ -21,4 +26,5 @@ export type PreviewFile = {
   fileUrl: string;
   fileType?: string;
   fileName?: string;
+  filePreviewUrls?: string[];
 };
