@@ -11,6 +11,7 @@ type CloudinaryUploadResult = {
   original_filename?: string;
   format?: string;
   bytes?: number;
+  pages?: number;
 };
 
 function getBaseFileName(fileName: string) {
@@ -28,15 +29,25 @@ function getCloudinaryFolder(fileType: string) {
   return "LearningProjects/LearnNotices/Images";
 }
 
-function getPublicId(fileName: string, fileType: string) {
+function getPublicId(fileName: string) {
   const baseName = getBaseFileName(fileName);
   const timestamp = Date.now();
 
-  if (fileType === "application/pdf") {
-    return `${timestamp}-${baseName}.pdf`;
-  }
-
   return `${timestamp}-${baseName}`;
+}
+
+function buildPdfPreviewUrls(publicId: string, pageCount: number) {
+  const safePageCount = Math.max(1, Math.min(pageCount || 1, 10));
+
+  return Array.from({ length: safePageCount }, (_, index) => {
+    const page = index + 1;
+
+    return cloudinary.url(publicId, {
+      secure: true,
+      resource_type: "image",
+      raw_transformation: `pg_${page},f_jpg,q_auto,w_1200,c_limit`,
+    });
+  });
 }
 
 function uploadBufferToCloudinary(
@@ -52,14 +63,28 @@ function uploadBufferToCloudinary(
         folder: getCloudinaryFolder(fileType),
 
         /*
-          For PDF:
-          - raw preserves the original file
-          - public_id must include .pdf
-          - delivery may still be blocked by Cloudinary security settings
+          Important:
+          PDF is uploaded as resource_type: "image"
+          so Cloudinary can generate page previews using pg_1, pg_2, etc.
         */
-        resource_type: isPdf ? "raw" : "image",
+        resource_type: "image",
 
-        public_id: getPublicId(fileName, fileType),
+        public_id: getPublicId(fileName),
+
+        /*
+          Keep original filename readable in Cloudinary.
+        */
+        filename_override: fileName,
+
+        /*
+          Do not auto-add random filename.
+        */
+        use_filename: false,
+
+        /*
+          For PDFs/images, this keeps format detection stable.
+        */
+        format: isPdf ? "pdf" : undefined,
       },
       (error, result) => {
         if (error || !result) {
@@ -140,13 +165,20 @@ export async function POST(request: Request) {
       file.type
     );
 
+    const isPdf = file.type === "application/pdf";
+
+    const filePreviewUrls = isPdf
+      ? buildPdfPreviewUrls(uploaded.public_id, uploaded.pages || 1)
+      : [uploaded.secure_url];
+
     return NextResponse.json({
       success: true,
       message: "File uploaded successfully.",
       data: {
         fileUrl: uploaded.secure_url,
-        publicId: uploaded.public_id,
-        resourceType: uploaded.resource_type,
+        filePublicId: uploaded.public_id,
+        fileResourceType: uploaded.resource_type,
+        filePreviewUrls,
         fileName: file.name,
         fileType: file.type,
         fileSize: file.size,
