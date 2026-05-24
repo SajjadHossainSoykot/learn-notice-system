@@ -8,6 +8,7 @@ type AttachmentPreviewModalProps = {
   fileUrl: string;
   fileType?: string;
   fileName?: string;
+  filePreviewUrls?: string[];
   onClose: () => void;
 };
 
@@ -16,16 +17,18 @@ export default function AttachmentPreviewModal({
   fileUrl,
   fileType,
   fileName,
+  filePreviewUrls = [],
   onClose,
 }: AttachmentPreviewModalProps) {
   if (!open || !fileUrl) return null;
 
   const isImage = fileType?.startsWith("image/");
   const isPdf = fileType === "application/pdf";
+  const hasPdfPagePreview = isPdf && filePreviewUrls.length > 0;
 
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 px-4 py-6">
-      <div className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white text-gray-900 shadow-xl">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 px-4 py-6">
+      <div className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white text-gray-900 shadow-xl">
         <div className="flex items-center justify-between gap-4 border-b px-5 py-4">
           <div className="min-w-0">
             <h2 className="truncate text-lg font-bold">Attachment Preview</h2>
@@ -57,8 +60,33 @@ export default function AttachmentPreviewModal({
             </div>
           )}
 
-          {isPdf && (
-            <div className="flex min-h-90 flex-col items-center justify-center rounded-xl border bg-white p-8 text-center">
+          {hasPdfPagePreview && (
+            <div className="mx-auto max-w-4xl space-y-5">
+              {filePreviewUrls.map((previewUrl, index) => (
+                <div
+                  key={previewUrl}
+                  className="rounded-xl border bg-white p-3 shadow-sm"
+                >
+                  <p className="mb-3 text-sm font-medium text-gray-600">
+                    Page {index + 1}
+                  </p>
+
+                  <div className="relative h-[70vh] w-full overflow-hidden rounded-lg border bg-gray-50">
+                    <Image
+                      src={previewUrl}
+                      alt={`${fileName || "PDF"} page ${index + 1}`}
+                      fill
+                      className="object-contain"
+                      sizes="100vw"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {isPdf && !hasPdfPagePreview && (
+            <div className="flex min-h-[360px] flex-col items-center justify-center rounded-xl border bg-white p-8 text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100">
                 <FileText size={34} className="text-gray-700" />
               </div>
@@ -66,9 +94,8 @@ export default function AttachmentPreviewModal({
               <h3 className="mb-2 text-xl font-bold">PDF Attachment</h3>
 
               <p className="mb-6 max-w-md text-sm leading-relaxed text-gray-600">
-                Browser preview for this PDF may not be available because some
-                Cloudinary PDF/raw URLs open as download in Chrome. You can open
-                or download the file using the buttons below.
+                PDF page preview is not available for this older upload. You can
+                open or download the PDF using the buttons below.
               </p>
 
               <div className="flex flex-wrap justify-center gap-3">
@@ -109,6 +136,14 @@ export default function AttachmentPreviewModal({
             className="rounded-lg border px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
           >
             Open in New Tab
+          </a>
+
+          <a
+            href={fileUrl}
+            download
+            className="rounded-lg border px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+          >
+            Download
           </a>
 
           <button
