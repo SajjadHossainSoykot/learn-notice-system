@@ -100,7 +100,7 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
 
     const sorted = [...notices].sort(
       (a, b) =>
-        new Date(b.noticeDate).getTime() - new Date(a.noticeDate).getTime()
+        new Date(b.noticeDate).getTime() - new Date(a.noticeDate).getTime(),
     );
 
     const categoryFiltered =
@@ -131,7 +131,7 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredNotices.length / ITEMS_PER_PAGE)
+    Math.ceil(filteredNotices.length / ITEMS_PER_PAGE),
   );
 
   const paginatedNotices = useMemo(() => {
@@ -175,7 +175,7 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
       }
 
       setNotices((prev) =>
-        prev.filter((notice) => notice._id !== deleteTarget._id)
+        prev.filter((notice) => notice._id !== deleteTarget._id),
       );
 
       setDeleteTarget(null);
@@ -193,8 +193,8 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
 
   return (
     <>
-      <main className="min-h-screen overflow-x-hidden bg-gray-50 px-4 py-8 text-gray-900 sm:px-6 sm:py-10">
-        <div className="mx-auto w-full max-w-7xl overflow-x-hidden">
+      <main className="min-h-screen bg-gray-50 px-4 py-8 text-gray-900 sm:px-6 sm:py-10">
+        <div className="mx-auto w-full max-w-7xl">
           <header className="mb-6 rounded-2xl border bg-white p-5 shadow-sm sm:p-6">
             <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
