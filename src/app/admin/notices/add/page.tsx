@@ -2,14 +2,13 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import FileDropzone from "@/components/notices/FileDropzone";
 
 type UploadedFileData = {
   fileUrl: string;
   fileType: string;
   fileName: string;
 };
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 export default function AdminAddNoticePage() {
   const router = useRouter();
@@ -22,39 +21,6 @@ export default function AdminAddNoticePage() {
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const selectedFile = e.target.files?.[0] || null;
-
-    if (!selectedFile) {
-      setFile(null);
-      return;
-    }
-
-    const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-      "application/pdf",
-    ];
-
-    if (!allowedTypes.includes(selectedFile.type)) {
-      setMessage("Only JPG, PNG, WEBP, and PDF files are allowed.");
-      e.target.value = "";
-      setFile(null);
-      return;
-    }
-
-    if (selectedFile.size > MAX_FILE_SIZE) {
-      setMessage("File size must be less than 10MB.");
-      e.target.value = "";
-      setFile(null);
-      return;
-    }
-
-    setMessage("");
-    setFile(selectedFile);
-  }
 
   async function uploadFileIfSelected(): Promise<UploadedFileData> {
     if (!file) {
@@ -207,28 +173,12 @@ export default function AdminAddNoticePage() {
             </p>
           </div>
 
-          <div>
-            <label className="mb-2 block font-medium">
-              Attachment <span className="text-gray-400">(optional)</span>
-            </label>
-
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp,application/pdf"
-              onChange={handleFileChange}
-              className="w-full rounded-lg border bg-white px-4 py-3 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
-            />
-
-            <p className="mt-2 text-sm text-gray-500">
-              Allowed: JPG, PNG, WEBP, PDF. Max file size: 10MB.
-            </p>
-
-            {file && (
-              <div className="mt-3 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-700">
-                Selected: <span className="font-medium">{file.name}</span>
-              </div>
-            )}
-          </div>
+          <FileDropzone
+            file={file}
+            onFileChange={setFile}
+            onError={setMessage}
+            label="Attachment"
+          />
 
           {message && (
             <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
