@@ -18,9 +18,14 @@ export async function GET() {
       description: notice.description,
       category: notice.category,
       noticeDate: notice.noticeDate || notice.createdAt,
+
       fileUrl: notice.fileUrl || "",
       fileType: notice.fileType || "",
       fileName: notice.fileName || "",
+      filePublicId: notice.filePublicId || "",
+      fileResourceType: notice.fileResourceType || "",
+      filePreviewUrls: notice.filePreviewUrls || [],
+
       createdBy: notice.createdBy || "",
       createdAt: notice.createdAt,
       updatedAt: notice.updatedAt,
@@ -65,9 +70,13 @@ export async function POST(request: Request) {
       description,
       category,
       noticeDate,
+
       fileUrl,
       fileType,
       fileName,
+      filePublicId,
+      fileResourceType,
+      filePreviewUrls,
     } = body;
 
     if (!title || !description || !category) {
@@ -87,9 +96,14 @@ export async function POST(request: Request) {
       description,
       category,
       noticeDate: finalNoticeDate,
+
       fileUrl: fileUrl || "",
       fileType: fileType || "",
       fileName: fileName || "",
+      filePublicId: filePublicId || "",
+      fileResourceType: fileResourceType || "",
+      filePreviewUrls: Array.isArray(filePreviewUrls) ? filePreviewUrls : [],
+
       createdBy: session.user.email,
       createdAt: new Date(),
       updatedAt: new Date(),
