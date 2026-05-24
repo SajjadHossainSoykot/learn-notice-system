@@ -10,9 +10,14 @@ type Notice = {
   description: string;
   category: string;
   noticeDate: string;
+
   fileUrl?: string;
   fileType?: string;
   fileName?: string;
+  filePublicId?: string;
+  fileResourceType?: string;
+  filePreviewUrls?: string[];
+
   createdAt: string;
   updatedAt: string;
 };
@@ -21,6 +26,9 @@ type UploadedFileData = {
   fileUrl: string;
   fileType: string;
   fileName: string;
+  filePublicId: string;
+  fileResourceType: string;
+  filePreviewUrls: string[];
 };
 
 function formatDateForInput(dateValue: string) {
@@ -47,6 +55,10 @@ export default function AdminEditNoticePage() {
   const [fileUrl, setFileUrl] = useState("");
   const [fileType, setFileType] = useState("");
   const [fileName, setFileName] = useState("");
+  const [filePublicId, setFilePublicId] = useState("");
+  const [fileResourceType, setFileResourceType] = useState("");
+  const [filePreviewUrls, setFilePreviewUrls] = useState<string[]>([]);
+
   const [newFile, setNewFile] = useState<File | null>(null);
 
   const [loading, setLoading] = useState(true);
@@ -80,13 +92,17 @@ export default function AdminEditNoticePage() {
 
         const notice: Notice = result.data;
 
-        setTitle(notice.title);
-        setDescription(notice.description);
-        setCategory(notice.category);
+        setTitle(notice.title || "");
+        setDescription(notice.description || "");
+        setCategory(notice.category || "General");
         setNoticeDate(formatDateForInput(notice.noticeDate));
+
         setFileUrl(notice.fileUrl || "");
         setFileType(notice.fileType || "");
         setFileName(notice.fileName || "");
+        setFilePublicId(notice.filePublicId || "");
+        setFileResourceType(notice.fileResourceType || "");
+        setFilePreviewUrls(notice.filePreviewUrls || []);
       } catch (error) {
         console.error("Fetch single notice error:", error);
         setMessage("Something went wrong while fetching notice.");
@@ -106,6 +122,9 @@ export default function AdminEditNoticePage() {
         fileUrl,
         fileType,
         fileName,
+        filePublicId,
+        fileResourceType,
+        filePreviewUrls,
       };
     }
 
@@ -124,9 +143,12 @@ export default function AdminEditNoticePage() {
     }
 
     return {
-      fileUrl: result.data.fileUrl,
-      fileType: result.data.fileType,
-      fileName: result.data.fileName,
+      fileUrl: result.data.fileUrl || "",
+      fileType: result.data.fileType || "",
+      fileName: result.data.fileName || "",
+      filePublicId: result.data.filePublicId || "",
+      fileResourceType: result.data.fileResourceType || "",
+      filePreviewUrls: result.data.filePreviewUrls || [],
     };
   }
 
@@ -171,6 +193,7 @@ export default function AdminEditNoticePage() {
       router.refresh();
     } catch (error) {
       console.error("Update notice error:", error);
+
       setMessage(
         error instanceof Error
           ? error.message
@@ -185,6 +208,9 @@ export default function AdminEditNoticePage() {
     setFileUrl("");
     setFileType("");
     setFileName("");
+    setFilePublicId("");
+    setFileResourceType("");
+    setFilePreviewUrls([]);
     setNewFile(null);
     setMessage("");
   }
@@ -307,6 +333,12 @@ export default function AdminEditNoticePage() {
                   Remove Attachment
                 </button>
               </div>
+
+              {filePreviewUrls.length > 0 && (
+                <p className="mt-3 text-xs text-gray-500">
+                  Preview pages/images saved: {filePreviewUrls.length}
+                </p>
+              )}
             </div>
           )}
 
