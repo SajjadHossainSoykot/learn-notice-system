@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, ImageIcon, ExternalLink, Eye } from "lucide-react";
+import { ExternalLink, Eye, FileText, ImageIcon } from "lucide-react";
 
 type NoticeAttachmentCardProps = {
   fileUrl?: string;
@@ -21,18 +21,18 @@ export default function NoticeAttachmentCard({
   const isPdf = fileType === "application/pdf";
 
   return (
-    <div className="mb-4 rounded-xl border bg-gray-50 p-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mb-4 w-full overflow-hidden rounded-xl border bg-gray-50 p-3 sm:p-4">
+      <div className="flex w-full min-w-0 flex-col gap-4">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm sm:h-12 sm:w-12">
             {isImage ? (
-              <ImageIcon size={22} className="text-gray-700" />
+              <ImageIcon size={21} className="text-gray-700" />
             ) : (
-              <FileText size={22} className="text-gray-700" />
+              <FileText size={21} className="text-gray-700" />
             )}
           </div>
 
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-gray-900">
               {fileName || "Notice attachment"}
             </p>
@@ -43,24 +43,24 @@ export default function NoticeAttachmentCard({
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
             onClick={onPreview}
-            className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
+            className="inline-flex min-w-0 items-center justify-center gap-2 rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
           >
             <Eye size={16} />
-            Preview
+            <span className="truncate">Preview</span>
           </button>
 
           <a
             href={fileUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg border bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+            className="inline-flex min-w-0 items-center justify-center gap-2 rounded-lg border bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
           >
             <ExternalLink size={16} />
-            Open
+            <span className="truncate">Open</span>
           </a>
         </div>
       </div>
