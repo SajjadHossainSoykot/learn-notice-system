@@ -253,6 +253,7 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
                           fileUrl: notice.fileUrl || "",
                           fileType: notice.fileType,
                           fileName: notice.fileName,
+                          filePreviewUrls: notice.filePreviewUrls || [],
                         })
                       }
                     />
@@ -351,6 +352,7 @@ export default function NoticeBoard({ mode }: NoticeBoardProps) {
         fileUrl={previewFile?.fileUrl || ""}
         fileType={previewFile?.fileType}
         fileName={previewFile?.fileName}
+        filePreviewUrls={previewFile?.filePreviewUrls || []}
         onClose={() => setPreviewFile(null)}
       />
 
